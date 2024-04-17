@@ -1,0 +1,37 @@
+# fly.toml app configuration file generated for blmc on 2024-04-16T14:51:09-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'blmc'
+primary_region = 'sjc'
+
+[build]
+
+[env]
+  EULA = true
+  MEMORY = "7G"
+  AUTOSTOP_TIMEOUT_EST    = 120
+  AUTOSTOP_TIMEOUT_INIT   = 120
+  AUTOSTOP_PKILL_USE_SUDO = "TRUE"
+  ENABLE_AUTO_STOP = "TRUE"
+  VERSION = "1.19.2"
+  TYPE = "AUTO_CURSEFORGE"
+  CF_SLUG = "all-of-fabric-6"
+
+[[services]]
+  internal_port = 25565
+  protocol = "tcp"
+  [[services.ports]]
+    port = 25565
+
+[[vm]]
+  memory = '8gb'
+  cpu_kind = 'shared'
+  cpus = 4
+
+[[mounts]]
+  source = "data"
+  destination = "data"
+  processes = ["app"]
+
