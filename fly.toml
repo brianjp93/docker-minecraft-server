@@ -28,7 +28,7 @@ primary_region = 'sjc'
 [[vm]]
   memory = '8gb'
   cpu_kind = 'shared'
-  cpus = 4
+  cpus = 8
 
 [[mounts]]
   source = "data"
