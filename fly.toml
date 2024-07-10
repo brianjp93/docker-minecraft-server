@@ -10,14 +10,14 @@ primary_region = 'sjc'
 
 [env]
   EULA = true
-  MEMORY = "7G"
+  MEMORY = "13G"
   AUTOSTOP_TIMEOUT_EST    = 120
   AUTOSTOP_TIMEOUT_INIT   = 120
   AUTOSTOP_PKILL_USE_SUDO = "TRUE"
   ENABLE_AUTO_STOP = "TRUE"
   VERSION = "1.19.2"
   TYPE = "AUTO_CURSEFORGE"
-  CF_SLUG = "all-of-fabric-6"
+  CF_PAGE_URL = "https://www.curseforge.com/minecraft/modpacks/all-of-fabric-6/files/4467529"
 
 [[services]]
   internal_port = 25565
@@ -26,7 +26,7 @@ primary_region = 'sjc'
     port = 25565
 
 [[vm]]
-  memory = '8gb'
+  memory = '16gb'
   cpu_kind = 'shared'
   cpus = 8
 

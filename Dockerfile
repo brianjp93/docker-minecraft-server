@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.3
 
-ARG BASE_IMAGE=eclipse-temurin:21-jre
+ARG BASE_IMAGE=eclipse-temurin:17-jre
 FROM ${BASE_IMAGE}
 
 # hook into docker BuildKit --platform support
