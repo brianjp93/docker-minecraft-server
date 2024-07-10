@@ -23,7 +23,7 @@ def handle_stop_signal(signum, frame):
     hours = total_minutes // 60
     minutes = total_minutes % 60
 
-    send_discord_message(f"Server is shutting down for now. Server was up for {hours}H {minutes}M {seconds}S.")
+    send_discord_message(f"**Shutting Down** : Server was up for {hours}H {minutes}M {seconds}S.")
 
     print("Cleanup done, exiting.")
 
@@ -44,13 +44,13 @@ def notify_on_server_ready():
             if code == 0:
                 end = time.time()
                 elapsed = end - start
-                send_discord_message(f"The server is ready. Took {int(elapsed)} seconds.")
+                send_discord_message(f"**READY** : Took {int(elapsed)} seconds.")
                 return
         time.sleep(5)
 
 
 if __name__ == '__main__':
-    send_discord_message("Attempting to spin up minecraft server.")
+    send_discord_message("**STARTING** : Please wait while server spins up.")
 
     # Register the signal handler
     signal.signal(signal.SIGTERM, handle_stop_signal)
