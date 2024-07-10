@@ -1,0 +1,5 @@
+#!/bin/bash
+
+curl -X POST "$DISCORD_WEBHOOK_URL" --data '{"content": "Attempting to spin up minecraft server."}' -H "Content-Type:application/json"
+
+. "${SCRIPTS:-/}start"
