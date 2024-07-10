@@ -15,6 +15,7 @@ primary_region = 'sjc'
   AUTOSTOP_TIMEOUT_INIT   = 120
   AUTOSTOP_PKILL_USE_SUDO = "TRUE"
   ENABLE_AUTO_STOP = "TRUE"
+  # USES_PROXY_PROTOCOL = "true"
   VERSION = "1.19.2"
   TYPE = "AUTO_CURSEFORGE"
   CF_PAGE_URL = "https://www.curseforge.com/minecraft/modpacks/all-of-fabric-6/files/4467529"
@@ -24,7 +25,11 @@ primary_region = 'sjc'
 [[services]]
   internal_port = 25565
   protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
   [[services.ports]]
+    # handlers = ["proxy_proto"]
     port = 25565
 
 [[vm]]
