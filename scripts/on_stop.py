@@ -26,6 +26,7 @@ def handle_stop_signal(signum, frame):
     send_discord_message(f"**Shutting Down** : Server was up for {hours}H {minutes}M {seconds}S.")
 
     print("Cleanup done, exiting.")
+    exit(0)
 
 
 def notify_on_server_ready():
@@ -54,6 +55,7 @@ if __name__ == '__main__':
 
     # Register the signal handler
     signal.signal(signal.SIGTERM, handle_stop_signal)
+    signal.signal(signal.SIGINT, handle_stop_signal)
 
     notify_on_server_ready()
     while True:
