@@ -5,6 +5,7 @@
 
 app = 'blmc'
 primary_region = 'sjc'
+kill_timeout = 60
 
 [build]
 
