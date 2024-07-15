@@ -18,13 +18,6 @@ def send_discord_message(message):
 def handle_stop_signal():
     print("Received stop signal, running cleanup tasks...")
 
-    do_mc_command(["save-off"])
-    do_mc_command(["save-all"])
-
-    print("Waiting for write.")
-    # wait for write
-    time.sleep(5)
-
     end = time.time()
     elapsed = int(end - START)
     total_minutes = elapsed // 60
