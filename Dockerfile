@@ -17,7 +17,8 @@ RUN --mount=target=/build,source=build \
 
 RUN apt-get update && apt-get install -y \
   vim \
-  restic
+  restic \
+  supervisor
 
 RUN --mount=target=/build,source=build \
     REV=${BUILD_FILES_REV} /build/run.sh setup-user
@@ -74,12 +75,12 @@ COPY --chmod=755 bin/ /usr/local/bin/
 COPY --chmod=755 bin/mc-health /health.sh
 COPY --chmod=644 files/* /image/
 COPY --chmod=755 files/auto /auto
-COPY --chmod=755 scripts/custom-start /
 COPY --chmod=755 scripts/on_stop.py /
+COPY scripts/supervisord.conf /
 
 RUN curl -fsSL -o /image/Log4jPatcher.jar https://github.com/CreeperHost/Log4jPatcher/releases/download/v1.0.1/Log4jPatcher-1.0.1.jar
 
 RUN dos2unix /start* /auto/*
 
-ENTRYPOINT [ "/custom-start" ]
+ENTRYPOINT [ "supervisord", "-c", "/supervisord.conf" ]
 HEALTHCHECK --start-period=1m --interval=5s --retries=24 CMD mc-health

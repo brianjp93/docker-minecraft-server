@@ -16,7 +16,7 @@ def send_discord_message(message):
     os.system(f'curl -X POST "$DISCORD_WEBHOOK_URL" --data \'{{"content": "{message}"}}\' -H "Content-Type:application/json"')
 
 
-def handle_stop_signal(loop: asyncio.AbstractEventLoop):
+def handle_stop_signal():
     print("Received stop signal, running cleanup tasks...")
 
     do_mc_command(["save-off"])
@@ -35,7 +35,7 @@ def handle_stop_signal(loop: asyncio.AbstractEventLoop):
     send_discord_message(f"**Shutting Down** : Server was up for {hours}H {minutes}M {seconds}S.")
 
     print("Cleanup done, exiting.")
-    loop.stop()
+    exit(0)
 
 
 def get_command_output(command: list[str]):
@@ -95,23 +95,19 @@ async def notify_on_server_ready():
 
 
 async def main():
-    loop = asyncio.get_running_loop()
-    loop.add_signal_handler(signal.SIGTERM, partial(handle_stop_signal, loop))
-    loop.add_signal_handler(signal.SIGINT, partial(handle_stop_signal, loop))
-
+    send_discord_message("**STARTING** : Please wait while server spins up.")
     await notify_on_server_ready()
-
-    asyncio.run_coroutine_threadsafe(do_backup_on_timer(delay=5, timer=30), loop)
+    asyncio.create_task(do_backup_on_timer(delay=5, timer=30))
 
     while True:
         await asyncio.sleep(1)
 
 
 if __name__ == '__main__':
-    send_discord_message("**STARTING** : Please wait while server spins up.")
-
     # manual creation because of some dumb reason involving the signal handler being set in a different loop
     loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGTERM, handle_stop_signal)
+    loop.add_signal_handler(signal.SIGINT, handle_stop_signal)
     try:
         loop.run_until_complete(main())
     finally:

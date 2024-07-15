@@ -1,4 +1,0 @@
-#!/bin/bash
-
-"${SCRIPTS:-/}on_stop.py" &
-. "${SCRIPTS:-/}start"
