@@ -5,23 +5,25 @@ import time
 import os
 import subprocess
 import asyncio
+from functools import partial
 
 
 START = time.time()
+BACKUP_COMMAND = ["restic",  "--verbose", "backup", "/data/world"]
 
 
 def send_discord_message(message):
     os.system(f'curl -X POST "$DISCORD_WEBHOOK_URL" --data \'{{"content": "{message}"}}\' -H "Content-Type:application/json"')
 
 
-def handle_stop_signal(signum, frame):
+def handle_stop_signal(loop: asyncio.AbstractEventLoop):
     print("Received stop signal, running cleanup tasks...")
 
     do_mc_command(["save-off"])
     do_mc_command(["save-all"])
 
     # wait for write
-    time.sleep(10)
+    time.sleep(2)
 
     end = time.time()
     elapsed = int(end - START)
@@ -33,7 +35,7 @@ def handle_stop_signal(signum, frame):
     send_discord_message(f"**Shutting Down** : Server was up for {hours}H {minutes}M {seconds}S.")
 
     print("Cleanup done, exiting.")
-    exit(0)
+    loop.stop()
 
 
 def get_command_output(command: list[str]):
@@ -48,7 +50,7 @@ async def do_backup():
     do_mc_command(["save-off"])
     # ensure writing finishes?
     await asyncio.sleep(5)
-    result = get_command_output(["restic",  "--verbose", "backup", "/data/world"])
+    result = get_command_output(BACKUP_COMMAND)
     if result.returncode == 0:
         do_mc_command(["say", "Backup completed."])
     else:
@@ -75,7 +77,7 @@ async def notify_on_server_ready():
     start = time.time()
     while True:
         try:
-            result = subprocess.run(["mc-health"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            result = get_command_output(["mc-health"])
             output = result.stdout
             code = result.returncode
             print(output)
@@ -93,8 +95,14 @@ async def notify_on_server_ready():
 
 
 async def main():
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGTERM, partial(handle_stop_signal, loop))
+    loop.add_signal_handler(signal.SIGINT, partial(handle_stop_signal, loop))
+
     await notify_on_server_ready()
-    asyncio.run_coroutine_threadsafe(do_backup_on_timer(delay=5, timer=30), asyncio.get_event_loop())
+
+    asyncio.run_coroutine_threadsafe(do_backup_on_timer(delay=5, timer=30), loop)
+
     while True:
         await asyncio.sleep(1)
 
@@ -102,10 +110,12 @@ async def main():
 if __name__ == '__main__':
     send_discord_message("**STARTING** : Please wait while server spins up.")
 
-    # Register the signal handler
-    signal.signal(signal.SIGTERM, handle_stop_signal)
-    signal.signal(signal.SIGINT, handle_stop_signal)
-    asyncio.run(main())
+    # manual creation because of some dumb reason involving the signal handler being set in a different loop
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(main())
+    finally:
+        loop.close()
+
     print("Finished async tasks.")
-    while True:
-        time.sleep(1)
+    exit(0)
