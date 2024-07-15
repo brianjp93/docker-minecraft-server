@@ -16,7 +16,8 @@ RUN --mount=target=/build,source=build \
     REV=${BUILD_FILES_REV} TARGET=${TARGETARCH}${TARGETVARIANT} /build/run.sh install-packages
 
 RUN apt-get update && apt-get install -y \
-  vim
+  vim \
+  restic
 
 RUN --mount=target=/build,source=build \
     REV=${BUILD_FILES_REV} /build/run.sh setup-user

@@ -29,6 +29,33 @@ def handle_stop_signal(signum, frame):
     exit(0)
 
 
+def get_command_output(command: list[str]):
+    return subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+
+def do_mc_command(command: list[str]):
+    return get_command_output(["mc-send-to-console"] + command)
+
+
+def do_backup():
+    do_mc_command(["save-off"])
+    result = get_command_output(["restic",  "--verbose", "backup", "/data/world"])
+    do_mc_command(["say", result.stdout])
+    do_mc_command(["save-on"])
+
+
+def do_backup_on_timer(timer=30):
+    """timer is time in minutes."""
+    last_save = 0
+    while now := time.time():
+        seconds = now - last_save
+        minutes = seconds / 60
+        if minutes >= timer:
+            last_save = now
+            do_backup()
+        time.sleep(1)
+
+
 def notify_on_server_ready():
     start = time.time()
     while True:
@@ -56,7 +83,7 @@ if __name__ == '__main__':
     # Register the signal handler
     signal.signal(signal.SIGTERM, handle_stop_signal)
     signal.signal(signal.SIGINT, handle_stop_signal)
-
     notify_on_server_ready()
+    do_backup_on_timer(timer=30)
     while True:
         time.sleep(1)

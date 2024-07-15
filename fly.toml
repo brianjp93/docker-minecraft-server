@@ -22,6 +22,8 @@ kill_timeout = 60
   CF_PAGE_URL = "https://www.curseforge.com/minecraft/modpacks/all-of-fabric-6/files/4467529"
   MOTD = "And then the log lady said, let there be logs."
   CREATE_CONSOLE_IN_PIPE = "true"
+  RESTIC_REPOSITORY = "/data/backups"
+  RESTIC_PASSWORD = "i do not care"
 
 [[services]]
   internal_port = 25565
