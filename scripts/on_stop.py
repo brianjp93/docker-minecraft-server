@@ -4,6 +4,7 @@ import signal
 import time
 import os
 import subprocess
+import asyncio
 
 
 START = time.time()
@@ -15,6 +16,12 @@ def send_discord_message(message):
 
 def handle_stop_signal(signum, frame):
     print("Received stop signal, running cleanup tasks...")
+
+    do_mc_command(["save-off"])
+    do_mc_command(["save-all"])
+
+    # wait for write
+    time.sleep(10)
 
     end = time.time()
     elapsed = int(end - START)
@@ -37,26 +44,34 @@ def do_mc_command(command: list[str]):
     return get_command_output(["mc-send-to-console"] + command)
 
 
-def do_backup():
+async def do_backup():
     do_mc_command(["save-off"])
+    # ensure writing finishes?
+    await asyncio.sleep(5)
     result = get_command_output(["restic",  "--verbose", "backup", "/data/world"])
-    do_mc_command(["say", result.stdout])
+    if result.returncode == 0:
+        do_mc_command(["say", "Backup completed."])
+    else:
+        do_mc_command(["say", "Backup may have failed."])
     do_mc_command(["save-on"])
 
 
-def do_backup_on_timer(timer=30):
+async def do_backup_on_timer(delay=5, timer=30):
     """timer is time in minutes."""
+    print('Starting backup loop.')
+    await asyncio.sleep(delay * 60)
     last_save = 0
     while now := time.time():
         seconds = now - last_save
         minutes = seconds / 60
         if minutes >= timer:
+            print('Doing backup.')
             last_save = now
-            do_backup()
-        time.sleep(1)
+            await do_backup()
+        await asyncio.sleep(1)
 
 
-def notify_on_server_ready():
+async def notify_on_server_ready():
     start = time.time()
     while True:
         try:
@@ -74,7 +89,14 @@ def notify_on_server_ready():
                 elapsed = end - start
                 send_discord_message(f"**READY** : Took {int(elapsed)} seconds.")
                 return
-        time.sleep(5)
+        await asyncio.sleep(5)
+
+
+async def main():
+    await notify_on_server_ready()
+    asyncio.run_coroutine_threadsafe(do_backup_on_timer(delay=5, timer=30), asyncio.get_event_loop())
+    while True:
+        await asyncio.sleep(1)
 
 
 if __name__ == '__main__':
@@ -83,7 +105,7 @@ if __name__ == '__main__':
     # Register the signal handler
     signal.signal(signal.SIGTERM, handle_stop_signal)
     signal.signal(signal.SIGINT, handle_stop_signal)
-    notify_on_server_ready()
-    do_backup_on_timer(timer=30)
+    asyncio.run(main())
+    print("Finished async tasks.")
     while True:
         time.sleep(1)
