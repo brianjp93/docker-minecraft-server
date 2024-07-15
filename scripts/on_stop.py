@@ -21,8 +21,9 @@ def handle_stop_signal():
     do_mc_command(["save-off"])
     do_mc_command(["save-all"])
 
+    print("Waiting for write.")
     # wait for write
-    time.sleep(2)
+    time.sleep(5)
 
     end = time.time()
     elapsed = int(end - START)
@@ -50,11 +51,8 @@ async def do_backup():
     # ensure writing finishes?
     await asyncio.sleep(5)
     result = get_command_output(BACKUP_COMMAND)
-    if result.returncode == 0:
-        do_mc_command(["say", "Backup completed."])
-    else:
-        do_mc_command(["say", "Backup may have failed."])
     do_mc_command(["save-on"])
+    return result.returncode
 
 
 async def do_backup_on_timer(delay=5, timer=30):
@@ -66,9 +64,12 @@ async def do_backup_on_timer(delay=5, timer=30):
         seconds = now - last_save
         minutes = seconds / 60
         if minutes >= timer:
-            print('Doing backup.')
             last_save = now
-            await do_backup()
+            code = await do_backup()
+            if code == 0:
+                do_mc_command(["say", f"Backup complete. Next backup in {timer} minutes"])
+            else:
+                do_mc_command(["say", "Backup may have failed."])
         await asyncio.sleep(1)
 
 
