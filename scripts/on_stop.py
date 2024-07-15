@@ -5,7 +5,6 @@ import time
 import os
 import subprocess
 import asyncio
-from functools import partial
 
 
 START = time.time()
