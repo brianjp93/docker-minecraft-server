@@ -3,5 +3,5 @@
 mc-send-to-console save-off
 mc-send-to-console save-all
 sleep 10
-restic  --verbose backup /data/world"
+restic  --verbose backup "/data/world"
 echo "Backup Completed"
