@@ -38,8 +38,8 @@ kill_timeout = 60
 
 [[vm]]
   memory = '16gb'
-  cpu_kind = 'shared'
-  cpus = 8
+  cpu_kind = 'performance'
+  cpus = 2
 
 [[mounts]]
   source = "data"
